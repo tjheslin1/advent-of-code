@@ -12,15 +12,14 @@ env:
 jobs:
   day1:
     name: Day 1
-    
+
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: Setup
-      run: |
-        cd 2021/day1
     - name: Build
+      working-directory: 2021/day1
       run: cargo build --verbose
     - name: Run tests
+      working-directory: 2021/day1
       run: cargo test --verbose
