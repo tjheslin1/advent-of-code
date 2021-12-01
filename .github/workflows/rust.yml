@@ -10,13 +10,17 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
+  day1:
+    name: Day 1
+    
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+    - name: Setup
+      run: |
+        cd 2021/day1
     - name: Build
-      run: cd 2021/day1 && cargo build --verbose
+      run: cargo build --verbose
     - name: Run tests
-      run: cd 2021/day1 && cargo test --verbose
+      run: cargo test --verbose
