@@ -1,13 +1,15 @@
 pub fn calculate_increased_depths(readings: &Vec<u32>) -> u32 {
-    readings
-        .windows(2)
-        .fold(0, |acc, w| if w[0] < w[1] { acc + 1 } else { acc })
+    calculate_increased_depths_with_window(1, readings)
 }
 
 pub fn calculate_three_measurement_increased_depths(readings: &Vec<u32>) -> u32 {
-    let three_measurement_windows: Vec<&[u32]> = readings.windows(3).collect();
+    calculate_increased_depths_with_window(3, readings)
+}
 
-    three_measurement_windows.windows(2).fold(0, |acc, w| {
+fn calculate_increased_depths_with_window(window_size: usize, readings: &Vec<u32>) -> u32 {
+    let measurement_windows: Vec<&[u32]> = readings.windows(window_size).collect();
+
+    measurement_windows.windows(2).fold(0, |acc, w| {
         if w[0].iter().sum::<u32>() < w[1].iter().sum::<u32>() {
             acc + 1
         } else {
