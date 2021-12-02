@@ -1,4 +1,4 @@
-pub fn determine_travel(directions: &Vec<(&str, u32)>) -> (u32, u32) {
+pub fn determine_travel(directions: &[(&str, u32)]) -> (u32, u32) {
     directions.iter().fold((0, 0), |acc, d| match d {
         ("forward", x) => (acc.0 + x, acc.1),
         ("down", x) => (acc.0, acc.1 + x),
@@ -11,7 +11,7 @@ pub fn determine_travel(directions: &Vec<(&str, u32)>) -> (u32, u32) {
     })
 }
 
-pub fn determine_travel_with_aim(directions: &Vec<(&str, u32)>) -> (u32, u32) {
+pub fn determine_travel_with_aim(directions: &[(&str, u32)]) -> (u32, u32) {
     let result = directions.iter().fold((0, 0, 0), |acc, d| match d {
         ("forward", x) => (acc.0 + x, acc.1 + (acc.2 * x), acc.2),
         ("down", x) => (acc.0, acc.1, acc.2 + x),

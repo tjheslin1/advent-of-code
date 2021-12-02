@@ -7,7 +7,7 @@ fn main() {
         fs::read_to_string("input.txt").expect("Something went wrong reading the file");
 
     let readings: Vec<u32> = contents
-        .split("\n")
+        .split('\n')
         .filter(|line| line.is_empty() == false)
         .map(|line| {
             line.parse::<u32>()
