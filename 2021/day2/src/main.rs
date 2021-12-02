@@ -26,6 +26,8 @@ fn main() {
         .collect();
 
     let coords = travel::determine_travel(&directions);
+    let aimed_coords = travel::determine_travel_with_aim(&directions);
 
     println!("Coords: {}, {}", coords.0, coords.1);
+    println!("Coords: {}, {}", aimed_coords.0, aimed_coords.1);
 }
