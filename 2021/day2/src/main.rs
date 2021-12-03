@@ -9,19 +9,15 @@ fn main() {
     let directions: Vec<(&str, u32)> = contents
         .split('\n')
         .filter(|line| line.is_empty() == false)
-        .map(|line| {
-            match &line.split(' ').collect::<Vec<&str>>()[..] {
-                [command, distance] => {
-                    let parsed_distance: u32 = distance
-                        .parse::<u32>()
-                        .expect("Error parsing input, expected a number.");
+        .map(|line| match &line.split(' ').collect::<Vec<&str>>()[..] {
+            [command, distance] => {
+                let parsed_distance: u32 = distance
+                    .parse::<u32>()
+                    .expect("Error parsing input, expected a number.");
 
-                    (*command, parsed_distance)
-                }
-                e => panic!("Unexpected input of length: {:?}", e),
+                (*command, parsed_distance)
             }
-            // line.parse::<u32>()
-            // .expect("Error parsing input, expected a number.")
+            e => panic!("Unexpected input of length: {:?}", e),
         })
         .collect();
 
