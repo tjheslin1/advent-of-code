@@ -46,7 +46,7 @@ fn find_by_bit_criteria(readings: &[&str], most_common: bool, on_match: char) ->
         if acc.len() > 1 {
             acc.iter()
                 .filter(|line| line.chars().nth(index).unwrap() == bit_to_match)
-                .map(|x| *x)
+                .copied()
                 .collect::<Vec<&str>>()
         } else {
             acc
@@ -82,12 +82,10 @@ fn find_common_bit(most_common: bool, column: &str, on_match: char) -> char {
         } else {
             '1'
         }
+    } else if most_common {
+        '1'
     } else {
-        if most_common {
-            '1'
-        } else {
-            '0'
-        }
+        '0'
     }
 }
 
