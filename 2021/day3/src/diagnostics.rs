@@ -1,5 +1,5 @@
 pub fn diagnostics_report(readings: &[&str]) -> (isize, isize) {
-    let reading_length = if readings.len() == 0 {
+    let reading_length = if readings.is_empty() {
         0
     } else {
         readings.get(0).unwrap().len()
