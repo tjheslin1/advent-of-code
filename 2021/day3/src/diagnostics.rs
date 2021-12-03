@@ -1,14 +1,15 @@
 pub fn diagnostics_report(readings: &[&str]) -> (isize, isize) {
-    let most_common =
-        column_bits(readings)
-            .iter()
-            .fold((String::from("0"), String::from("0")), |acc, column| {
-                if most_common_bit(column, '0') == '0' {
-                    (acc.0 + "0", acc.1 + "1")
-                } else {
-                    (acc.0 + "1", acc.1 + "0")
-                }
-            });
+    let initialised_readings = (String::from("0"), String::from("0"));
+
+    let most_common = column_bits(readings)
+        .iter()
+        .fold(initialised_readings, |acc, column| {
+            if most_common_bit(column, '0') == '0' {
+                (acc.0 + "0", acc.1 + "1")
+            } else {
+                (acc.0 + "1", acc.1 + "0")
+            }
+        });
 
     match most_common {
         (b_gamma, b_epsilon) => {
@@ -55,6 +56,7 @@ fn find_by_bit_criteria(readings: &[&str], most_common: bool, on_match: char) ->
 
     match reduced_readings[..] {
         [binary] => binary_to_decimal(binary),
+        [_, _] => panic!("Unable to reduce down to a single binary value!"),
         _ => 0,
     }
 }
