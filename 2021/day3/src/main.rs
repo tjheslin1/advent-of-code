@@ -12,6 +12,8 @@ fn main() {
         .collect();
 
     let (gamma, epsilon) = diagnostics::diagnostics_report(&readings);
-
     println!("gamma = {}, epsilon = {}", gamma, epsilon);
+
+    let (oxygen, co2) = diagnostics::life_support_rating(&readings);
+    println!("oxygen = {}, co2 = {}", oxygen, co2);
 }
