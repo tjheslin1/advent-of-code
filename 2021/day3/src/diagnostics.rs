@@ -1,9 +1,9 @@
 pub fn diagnostics_report(readings: &[&str]) -> (isize, isize) {
-    if readings.len() == 0 {
-        return (0, 0);
-    }
-
-    let reading_length = readings.get(0).unwrap().len();
+    let reading_length = if readings.len() == 0 {
+        0
+    } else {
+        readings.get(0).unwrap().len()
+    };
 
     let column_bits: Vec<String> =
         (0..reading_length).fold(vec![String::new(); reading_length], |mut acc, index| {
@@ -18,7 +18,7 @@ pub fn diagnostics_report(readings: &[&str]) -> (isize, isize) {
 
     let most_common = column_bits
         .iter()
-        .fold((String::new(), String::new()), |acc, column| {
+        .fold((String::from("0"), String::from("0")), |acc, column| {
             let count_zeroes = column.chars().filter(|char| *char == '0').count();
 
             if count_zeroes >= (column.len() / 2) {
