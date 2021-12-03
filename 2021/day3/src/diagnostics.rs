@@ -16,17 +16,18 @@ pub fn diagnostics_report(readings: &[&str]) -> (isize, isize) {
             acc
         });
 
-    let most_common = column_bits
-        .iter()
-        .fold((String::from("0"), String::from("0")), |acc, column| {
-            let count_zeroes = column.chars().filter(|char| *char == '0').count();
+    let most_common =
+        column_bits
+            .iter()
+            .fold((String::from("0"), String::from("0")), |acc, column| {
+                let count_zeroes = column.chars().filter(|char| *char == '0').count();
 
-            if count_zeroes >= (column.len() / 2) {
-                (acc.0 + "0", acc.1 + "1")
-            } else {
-                (acc.0 + "1", acc.1 + "0")
-            }
-        });
+                if count_zeroes >= (column.len() / 2) {
+                    (acc.0 + "0", acc.1 + "1")
+                } else {
+                    (acc.0 + "1", acc.1 + "0")
+                }
+            });
 
     match most_common {
         (b_gamma, b_epsilon) => {
