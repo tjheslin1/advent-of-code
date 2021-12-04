@@ -24,20 +24,19 @@ impl BingoCard {
 pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
     let lines: Vec<&str> = input.split('\n').collect();
 
-    let (bingo_numbers, cards) = match lines.split_first() {
+    let (bingo_numbers, card_input) = match lines.split_first() {
         Some((first, rest)) => (first, rest),
         _ => (&"", &[] as &[&str]),
     };
 
-    let x = cards
+    let cards = card_input
         .split(|line| line.is_empty())
         .filter(|line| line.is_empty() == false)
-        .collect::<Vec<&[&str]>>();
+        .map(|card| BingoCard::from_input(card))
+        .collect::<Vec<BingoCard>>();
 
-    println!("x.len = {:?}", x.len());
-    println!("{:?}", x);
-
-    ("", vec![])
+    // ("", vec![])
+    (bingo_numbers, cards)
 }
 
 #[cfg(test)]
@@ -114,7 +113,7 @@ mod tests {
             vec![(22, false),(13, false),(17, false),(11, false),(0, false),],
             vec![(8, false),(2, false),(23, false),(4, false),(24, false),],
             vec![(21, false),(9, false),(14, false),(16, false),(7, false),],
-            vec![(6, false),(10, false),(3, false),(8, false),(5, false),],
+            vec![(6, false),(10, false),(3, false),(18, false),(5, false),],
             vec![(1, false),(12, false),(20, false),(15, false),(19, false),],
         ]},
         BingoCard { grid: vec![
