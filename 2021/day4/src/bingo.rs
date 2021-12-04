@@ -21,7 +21,11 @@ impl BingoCard {
     }
 }
 
-pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
+pub fn run_bingo(bingo_numbers: &str, cards: Vec<BingoCard>) -> &[u32] {
+    &[0; 1]
+}
+
+fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
     let lines: Vec<&str> = input.split('\n').collect();
 
     let (bingo_numbers, card_input) = match lines.split_first() {
@@ -35,7 +39,6 @@ pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
         .map(|card| BingoCard::from_input(card))
         .collect::<Vec<BingoCard>>();
 
-    // ("", vec![])
     (bingo_numbers, cards)
 }
 
@@ -43,6 +46,43 @@ pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
 mod tests {
 
     use crate::bingo::*;
+
+    #[test]
+    fn run_bingo_example() {
+        let bingo_numbers =
+            "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1";
+
+        #[rustfmt::skip]
+            let cards = vec![
+            BingoCard { grid: vec![
+                vec![(22, false),(13, false),(17, false),(11, false),(0, false),],
+                vec![(8, false),(2, false),(23, false),(4, false),(24, false),],
+                vec![(21, false),(9, false),(14, false),(16, false),(7, false),],
+                vec![(6, false),(10, false),(3, false),(18, false),(5, false),],
+                vec![(1, false),(12, false),(20, false),(15, false),(19, false),],
+            ]},
+            BingoCard { grid: vec![
+                vec![(3, false),(15, false),(0, false),(2, false),(22, false),],
+                vec![(9, false),(18, false),(13, false),(17, false),(5, false),],
+                vec![(19, false),(8, false),(7, false),(25, false),(23, false),],
+                vec![(20, false),(11, false),(10, false),(24, false),(4, false),],
+                vec![(14, false),(21, false),(16, false),(12, false),(6, false),],
+            ]},
+            BingoCard { grid: vec![
+                vec![(14, false),(21, false),(17, false),(24, false),(4, false),],
+                vec![(10, false),(16, false),(15, false),(9, false),(19, false),],
+                vec![(18, false),(8, false),(23, false),(26, false),(20, false),],
+                vec![(22, false),(11, false),(13, false),(6, false),(5, false),],
+                vec![(2, false),(0, false),(12, false),(3, false),(7, false),],
+            ]},
+            ];
+
+        let actual_result = run_bingo(bingo_numbers, cards);
+
+        let expected_result = vec![14, 21, 17, 24, 4];
+
+        assert_eq!(actual_result, expected_result);
+    }
 
     #[test]
     fn construct_empty_bingo_card_from_input() {
