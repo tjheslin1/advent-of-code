@@ -1,31 +1,53 @@
 #[derive(Debug, PartialEq)]
 pub struct BingoCard {
-    grid: Vec<Vec<(u32, bool)>>,
+    grid: Vec<([usize; 2], u32, bool)>,
 }
 
 impl BingoCard {
     pub fn from_input(input: &[&str]) -> Self {
+        let row_count = input.len();
+
         let grid = input
             .iter()
-            .map(|line| {
-                line.replace("  ", " ")
+            .zip(0..row_count)
+            .map(|(line, y)| {
+                let mut row_numbers = line
+                    .replace("  ", " ")
                     .trim()
                     .split(' ')
                     .map(|n| n.parse::<u32>().unwrap())
-                    .map(|n| (n, false))
-                    .collect::<Vec<(u32, bool)>>()
+                    .collect::<Vec<u32>>();
+
+                let col_count = row_numbers.len();
+
+                row_numbers
+                    .iter_mut()
+                    .zip(0..col_count)
+                    .map(|(n, x)| ([x, y], *n, false))
+                    // .into_iter()
+                    .collect::<Vec<([usize; 2], u32, bool)>>()
             })
-            .collect::<Vec<Vec<(u32, bool)>>>();
+            .flatten()
+            .collect::<Vec<([usize; 2], u32, bool)>>();
 
         BingoCard { grid }
     }
 }
 
-pub fn run_bingo(bingo_numbers: &str, cards: Vec<BingoCard>) -> &[u32] {
+pub fn run_bingo(bingo_numbers: &str, mut cards: Vec<BingoCard>) -> &[u32] {
+    // bingo_numbers
+    //     .split(',')
+    //     .map(|n| n.parse::<u32>().unwrap())
+    //     .for_each(|bingo_num| {
+    //         cards.iter_mut().for_each(|card| {
+    //             let found_num = card.grid.iter_mut().find(|num| num == bingo_num);
+    //         })
+    //     });
+
     &[0; 1]
 }
 
-fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
+pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
     let lines: Vec<&str> = input.split('\n').collect();
 
     let (bingo_numbers, card_input) = match lines.split_first() {
@@ -55,25 +77,25 @@ mod tests {
         #[rustfmt::skip]
             let cards = vec![
             BingoCard { grid: vec![
-                vec![(22, false),(13, false),(17, false),(11, false),(0, false),],
-                vec![(8, false),(2, false),(23, false),(4, false),(24, false),],
-                vec![(21, false),(9, false),(14, false),(16, false),(7, false),],
-                vec![(6, false),(10, false),(3, false),(18, false),(5, false),],
-                vec![(1, false),(12, false),(20, false),(15, false),(19, false),],
+                ([0,0], 22, false),([1,0], 13, false),([2,0], 17, false),([3,0], 11, false),([4,0], 0, false),
+                ([0,1], 8, false),([1,1], 2, false),([2,1], 23, false),([3,1], 4, false),([4,1], 24, false),
+                ([0,2], 21, false),([1,2], 9, false),([2,2], 14, false),([3,2], 16, false),([4,2], 7, false),
+                ([0,3], 6, false),([1,3], 10, false),([2,3], 3, false),([3,3], 18, false),([4,3], 5, false),
+                ([0,4], 1, false),([1,4], 12, false),([2,4], 20, false),([3,4], 15, false),([4,4], 19, false),
             ]},
             BingoCard { grid: vec![
-                vec![(3, false),(15, false),(0, false),(2, false),(22, false),],
-                vec![(9, false),(18, false),(13, false),(17, false),(5, false),],
-                vec![(19, false),(8, false),(7, false),(25, false),(23, false),],
-                vec![(20, false),(11, false),(10, false),(24, false),(4, false),],
-                vec![(14, false),(21, false),(16, false),(12, false),(6, false),],
+                ([0,0], 3, false),([1,0], 15, false),([2,0], 0, false),([3,0], 2, false),([4,0], 22, false),
+                ([0,1], 9, false),([1,1], 18, false),([2,1], 13, false),([3,1], 17, false),([4,1], 5, false),
+                ([0,2], 19, false),([1,2], 8, false),([2,2], 7, false),([3,2], 25, false),([4,2], 23, false),
+                ([0,3], 20, false),([1,3], 11, false),([2,3], 10, false),([3,3], 24, false),([4,3], 4, false),
+                ([0,4], 14, false),([1,4], 21, false),([2,4], 16, false),([3,4], 12, false),([4,4], 6, false),
             ]},
             BingoCard { grid: vec![
-                vec![(14, false),(21, false),(17, false),(24, false),(4, false),],
-                vec![(10, false),(16, false),(15, false),(9, false),(19, false),],
-                vec![(18, false),(8, false),(23, false),(26, false),(20, false),],
-                vec![(22, false),(11, false),(13, false),(6, false),(5, false),],
-                vec![(2, false),(0, false),(12, false),(3, false),(7, false),],
+                ([0,0], 14, false),([1,0], 21, false),([2,0], 17, false),([3,0], 24, false),([4,0], 4, false),
+                ([0,1], 10, false),([1,1], 16, false),([2,1], 15, false),([3,1], 9, false),([4,1], 19, false),
+                ([0,2], 18, false),([1,2], 8, false),([2,2], 23, false),([3,2], 26, false),([4,2], 20, false),
+                ([0,3], 22, false),([1,3], 11, false),([2,3], 13, false),([3,3], 6, false),([4,3], 5, false),
+                ([0,4], 2, false),([1,4], 0, false),([2,4], 12, false),([3,4], 3, false),([4,4], 7, false),
             ]},
             ];
 
@@ -110,11 +132,11 @@ mod tests {
         #[rustfmt::skip]
         let expected_bingo_card = BingoCard {
             grid: vec![
-                vec![(22, false),(13, false),(17, false),(11, false),(0, false),],
-                vec![(8, false),(2, false),(23, false),(4, false),(24, false),],
-                vec![(21, false),(9, false),(14, false),(16, false),(7, false),],
-                vec![(6, false),(10, false),(3, false),(18, false),(5, false),],
-                vec![(1, false),(12, false),(20, false),(15, false),(19, false),],
+                ([0,0], 22, false),([1,0], 13, false),([2,0], 17, false),([3,0], 11, false),([4,0], 0, false),
+                ([0,1], 8, false),([1,1], 2, false),([2,1], 23, false),([3,1], 4, false),([4,1], 24, false),
+                ([0,2], 21, false),([1,2], 9, false),([2,2], 14, false),([3,2], 16, false),([4,2], 7, false),
+                ([0,3], 6, false),([1,3], 10, false),([2,3], 3, false),([3,3], 18, false),([4,3], 5, false),
+                ([0,4], 1, false),([1,4], 12, false),([2,4], 20, false),([3,4], 15, false),([4,4], 19, false),
             ],
         };
 
@@ -145,23 +167,36 @@ mod tests {
  9 18 13 17  5
 19  8  7 25 23
 20 11 10 24  4
-14 21 16 12  6";
+14 21 16 12  6
+
+14 21 17 24  4
+10 16 15  9 19
+18  8 23 26 20
+22 11 13  6  5
+ 2  0 12  3  7";
 
         #[rustfmt::skip]
         let expected_bingo_cards = vec![
         BingoCard { grid: vec![
-            vec![(22, false),(13, false),(17, false),(11, false),(0, false),],
-            vec![(8, false),(2, false),(23, false),(4, false),(24, false),],
-            vec![(21, false),(9, false),(14, false),(16, false),(7, false),],
-            vec![(6, false),(10, false),(3, false),(18, false),(5, false),],
-            vec![(1, false),(12, false),(20, false),(15, false),(19, false),],
+            ([0,0], 22, false),([1,0], 13, false),([2,0], 17, false),([3,0], 11, false),([4,0], 0, false),
+            ([0,1], 8, false),([1,1], 2, false),([2,1], 23, false),([3,1], 4, false),([4,1], 24, false),
+            ([0,2], 21, false),([1,2], 9, false),([2,2], 14, false),([3,2], 16, false),([4,2], 7, false),
+            ([0,3], 6, false),([1,3], 10, false),([2,3], 3, false),([3,3], 18, false),([4,3], 5, false),
+            ([0,4], 1, false),([1,4], 12, false),([2,4], 20, false),([3,4], 15, false),([4,4], 19, false),
         ]},
         BingoCard { grid: vec![
-            vec![(3, false),(15, false),(0, false),(2, false),(22, false),],
-            vec![(9, false),(18, false),(13, false),(17, false),(5, false),],
-            vec![(19, false),(8, false),(7, false),(25, false),(23, false),],
-            vec![(20, false),(11, false),(10, false),(24, false),(4, false),],
-            vec![(14, false),(21, false),(16, false),(12, false),(6, false),],
+            ([0,0], 3, false),([1,0], 15, false),([2,0], 0, false),([3,0], 2, false),([4,0], 22, false),
+            ([0,1], 9, false),([1,1], 18, false),([2,1], 13, false),([3,1], 17, false),([4,1], 5, false),
+            ([0,2], 19, false),([1,2], 8, false),([2,2], 7, false),([3,2], 25, false),([4,2], 23, false),
+            ([0,3], 20, false),([1,3], 11, false),([2,3], 10, false),([3,3], 24, false),([4,3], 4, false),
+            ([0,4], 14, false),([1,4], 21, false),([2,4], 16, false),([3,4], 12, false),([4,4], 6, false),
+        ]},
+        BingoCard { grid: vec![
+            ([0,0], 14, false),([1,0], 21, false),([2,0], 17, false),([3,0], 24, false),([4,0], 4, false),
+            ([0,1], 10, false),([1,1], 16, false),([2,1], 15, false),([3,1], 9, false),([4,1], 19, false),
+            ([0,2], 18, false),([1,2], 8, false),([2,2], 23, false),([3,2], 26, false),([4,2], 20, false),
+            ([0,3], 22, false),([1,3], 11, false),([2,3], 13, false),([3,3], 6, false),([4,3], 5, false),
+            ([0,4], 2, false),([1,4], 0, false),([2,4], 12, false),([3,4], 3, false),([4,4], 7, false),
         ]},
         ];
 
