@@ -35,14 +35,10 @@ impl BingoCard {
 }
 
 pub fn run_bingo(bingo_numbers: &str, mut cards: Vec<BingoCard>) -> &[u32] {
-    // bingo_numbers
-    //     .split(',')
-    //     .map(|n| n.parse::<u32>().unwrap())
-    //     .for_each(|bingo_num| {
-    //         cards.iter_mut().for_each(|card| {
-    //             let found_num = card.grid.iter_mut().find(|num| num == bingo_num);
-    //         })
-    //     });
+    bingo_numbers
+        .split(',')
+        .map(|n| n.parse::<u32>().unwrap())
+        .for_each(|bingo_num| cards.iter_mut().for_each(|card| {}));
 
     &[0; 1]
 }
@@ -62,6 +58,13 @@ pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
         .collect::<Vec<BingoCard>>();
 
     (bingo_numbers, cards)
+}
+
+fn mark_card(card: &mut BingoCard, bingo_num: &u32) {
+    match card.grid.iter_mut().find(|(_, num, _)| num == bingo_num) {
+        Some((_, _, marked)) => *marked = true,
+        _ => (),
+    }
 }
 
 #[cfg(test)]
@@ -104,6 +107,42 @@ mod tests {
         let expected_result = vec![14, 21, 17, 24, 4];
 
         assert_eq!(actual_result, expected_result);
+    }
+
+    #[test]
+    fn mark_card_example() {
+        #[rustfmt::skip]
+        let mut actual_card = BingoCard { grid: vec![
+            ([0,0], 22, false),([1,0], 13, false),([2,0], 17, false),([3,0], 11, false),([4,0], 0, false),
+            ([0,1], 8, false),([1,1], 2, false),([2,1], 23, false),([3,1], 4, false),([4,1], 24, false),
+            ([0,2], 21, false),([1,2], 9, false),([2,2], 14, false),([3,2], 16, false),([4,2], 7, false),
+            ([0,3], 6, false),([1,3], 10, false),([2,3], 3, false),([3,3], 18, false),([4,3], 5, false),
+            ([0,4], 1, false),([1,4], 12, false),([2,4], 20, false),([3,4], 15, false),([4,4], 19, false),
+        ]};
+
+        #[rustfmt::skip]
+        let expected_marked_card_7 = BingoCard { grid: vec![
+            ([0,0], 22, false),([1,0], 13, false),([2,0], 17, false),([3,0], 11, false),([4,0], 0, false),
+            ([0,1], 8, false),([1,1], 2, false),([2,1], 23, false),([3,1], 4, false),([4,1], 24, false),
+            ([0,2], 21, false),([1,2], 9, false),([2,2], 14, false),([3,2], 16, false),([4,2], 7, true),
+            ([0,3], 6, false),([1,3], 10, false),([2,3], 3, false),([3,3], 18, false),([4,3], 5, false),
+            ([0,4], 1, false),([1,4], 12, false),([2,4], 20, false),([3,4], 15, false),([4,4], 19, false),
+        ]};
+
+        #[rustfmt::skip]
+        let expected_marked_card_4 = BingoCard { grid: vec![
+            ([0,0], 22, false),([1,0], 13, false),([2,0], 17, false),([3,0], 11, false),([4,0], 0, false),
+            ([0,1], 8, false),([1,1], 2, false),([2,1], 23, false),([3,1], 4, true),([4,1], 24, false),
+            ([0,2], 21, false),([1,2], 9, false),([2,2], 14, false),([3,2], 16, false),([4,2], 7, true),
+            ([0,3], 6, false),([1,3], 10, false),([2,3], 3, false),([3,3], 18, false),([4,3], 5, false),
+            ([0,4], 1, false),([1,4], 12, false),([2,4], 20, false),([3,4], 15, false),([4,4], 19, false),
+        ]};
+
+        mark_card(&mut actual_card, &7);
+        assert_eq!(actual_card, expected_marked_card_7);
+
+        mark_card(&mut actual_card, &4);
+        assert_eq!(actual_card, expected_marked_card_4);
     }
 
     #[test]
