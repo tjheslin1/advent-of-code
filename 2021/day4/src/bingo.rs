@@ -1,6 +1,6 @@
 type BingoNumber = ([usize; 2], u32, bool);
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct BingoCard {
     grid: Vec<BingoNumber>,
 }
@@ -12,7 +12,7 @@ impl BingoCard {
         let grid = input
             .iter()
             .zip(0..col_length)
-            .map(|(line, y)| {
+            .flat_map(|(line, y)| {
                 let mut row_numbers = line
                     .replace("  ", " ")
                     .trim()
@@ -29,20 +29,36 @@ impl BingoCard {
                     // .into_iter()
                     .collect::<Vec<BingoNumber>>()
             })
-            .flatten()
             .collect::<Vec<BingoNumber>>();
 
         BingoCard { grid }
     }
 }
 
-pub fn run_bingo(bingo_numbers: &str, mut cards: Vec<BingoCard>) -> &[u32] {
-    bingo_numbers
-        .split(',')
-        .map(|n| n.parse::<u32>().unwrap())
-        .for_each(|bingo_num| cards.iter_mut().for_each(|card| {}));
+pub fn run_bingo(bingo_input: &str, cards: &mut Vec<BingoCard>) -> u32 {
+    let bingo_numbers = bingo_input.split(',').map(|n| n.parse::<u32>().unwrap());
 
-    &[0; 1]
+    let mut winner: u32 = 0;
+
+    'outer: for bingo_num in bingo_numbers {
+        for card in cards.iter_mut() {
+            mark_card(card, bingo_num);
+
+            if check_card(card).is_empty() == false {
+                let sum_of_unmarked = card
+                    .grid
+                    .iter_mut()
+                    .filter(|(_, _, marked)| *marked == false)
+                    .map(|(_, num, _)| *num)
+                    .sum::<u32>();
+
+                winner = sum_of_unmarked * bingo_num;
+                break 'outer;
+            }
+        }
+    }
+
+    return winner;
 }
 
 pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
@@ -62,14 +78,13 @@ pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
     (bingo_numbers, cards)
 }
 
-fn mark_card(card: &mut BingoCard, bingo_num: &u32) {
-    match card.grid.iter_mut().find(|(_, num, _)| num == bingo_num) {
-        Some((_, _, marked)) => *marked = true,
-        _ => (),
+fn mark_card(card: &mut BingoCard, bingo_num: u32) {
+    if let Some((_, _, marked)) = card.grid.iter_mut().find(|(_, num, _)| *num == bingo_num) {
+        *marked = true
     }
 }
 
-fn check_card(card: &BingoCard) -> Vec<&u32> {
+fn check_card(card: &BingoCard) -> Vec<u32> {
     let marked_cards = card
         .grid
         .iter()
@@ -96,22 +111,17 @@ fn check_card(card: &BingoCard) -> Vec<&u32> {
         .clone()
         + 1;
 
-    println!("col_length = {}", col_length);
-    println!("row_length = {}", row_length);
-
     // (0..col_length).flat_map(|y| {
     //         (0..row_length).flat_map(|x| {
 
-    // TODO: improve this to map over and return Vec of all winning to find ties!!
+    // TODO: improve this to map over and return Vec of all winning (a row and a col) !!
 
     for y in 0..col_length {
         let marked_in_col = marked_cards
             .iter()
             .filter(|([_, card_y], _, _)| *card_y == y)
-            .map(|([_, _], num, _)| num)
-            .collect::<Vec<&u32>>();
-
-        println!("{:?}", marked_in_col);
+            .map(|([_, _], num, _)| *num)
+            .collect::<Vec<u32>>();
 
         if marked_in_col.len() == col_length {
             return marked_in_col;
@@ -121,8 +131,8 @@ fn check_card(card: &BingoCard) -> Vec<&u32> {
             let marked_in_row = marked_cards
                 .iter()
                 .filter(|([card_x, _], _, _)| *card_x == x)
-                .map(|([_, _], num, _)| num)
-                .collect::<Vec<&u32>>();
+                .map(|([_, _], num, _)| *num)
+                .collect::<Vec<u32>>();
 
             if marked_in_row.len() == row_length {
                 return marked_in_row;
@@ -145,7 +155,7 @@ mod tests {
             "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1";
 
         #[rustfmt::skip]
-            let cards = vec![
+            let mut cards = vec![
             BingoCard { grid: vec![
                 ([0,0], 22, false),([1,0], 13, false),([2,0], 17, false),([3,0], 11, false),([4,0], 0, false),
                 ([0,1], 8, false),([1,1], 2, false),([2,1], 23, false),([3,1], 4, false),([4,1], 24, false),
@@ -169,11 +179,9 @@ mod tests {
             ]},
             ];
 
-        let actual_result = run_bingo(bingo_numbers, cards);
+        let actual_result = run_bingo(bingo_numbers, &mut cards);
 
-        let expected_result = vec![14, 21, 17, 24, 4];
-
-        assert_eq!(actual_result, expected_result);
+        assert_eq!(actual_result, 4512);
     }
 
     #[test]
@@ -205,10 +213,10 @@ mod tests {
             ([0,4], 1, false),([1,4], 12, false),([2,4], 20, false),([3,4], 15, false),([4,4], 19, false),
         ]};
 
-        mark_card(&mut actual_card, &7);
+        mark_card(&mut actual_card, 7);
         assert_eq!(actual_card, expected_marked_card_7);
 
-        mark_card(&mut actual_card, &4);
+        mark_card(&mut actual_card, 4);
         assert_eq!(actual_card, expected_marked_card_4);
     }
 
@@ -224,7 +232,7 @@ mod tests {
         ]};
 
         let actual_result = check_card(&losing_card);
-        let expected_result: Vec<&u32> = vec![];
+        let expected_result: Vec<u32> = vec![];
 
         assert_eq!(actual_result, expected_result);
     }
@@ -241,7 +249,7 @@ mod tests {
         ]};
 
         let actual_result = check_card(&losing_card);
-        let expected_result: Vec<&u32> = vec![&21, &9, &14, &16, &7];
+        let expected_result: Vec<u32> = vec![21, 9, 14, 16, 7];
 
         assert_eq!(actual_result, expected_result);
     }
@@ -258,7 +266,7 @@ mod tests {
         ]};
 
         let actual_result = check_card(&losing_card);
-        let expected_result: Vec<&u32> = vec![];
+        let expected_result: Vec<u32> = vec![];
 
         assert_eq!(actual_result, expected_result);
     }
@@ -275,7 +283,7 @@ mod tests {
         ]};
 
         let actual_result = check_card(&losing_card);
-        let expected_result: Vec<&u32> = vec![&22, &8, &21, &6, &1];
+        let expected_result: Vec<u32> = vec![22, 8, 21, 6, 1];
 
         assert_eq!(actual_result, expected_result);
     }
