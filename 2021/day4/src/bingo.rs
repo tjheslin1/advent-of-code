@@ -58,7 +58,7 @@ pub fn run_bingo(bingo_input: &str, cards: &mut Vec<BingoCard>) -> u32 {
         }
     }
 
-    return winner;
+    winner
 }
 
 pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
@@ -72,7 +72,7 @@ pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
     let cards = card_input
         .split(|line| line.is_empty())
         .filter(|line| line.is_empty() == false)
-        .map(|card| BingoCard::from_input(card))
+        .map(BingoCard::from_input)
         .collect::<Vec<BingoCard>>();
 
     (bingo_numbers, cards)
@@ -98,7 +98,6 @@ fn check_card(card: &BingoCard) -> Vec<u32> {
         .map(|([_, y], _, _)| y)
         .max()
         .unwrap()
-        .clone()
         + 1;
 
     let row_length = card
@@ -108,7 +107,6 @@ fn check_card(card: &BingoCard) -> Vec<u32> {
         .map(|([x, _], _, _)| x)
         .max()
         .unwrap()
-        .clone()
         + 1;
 
     // (0..col_length).flat_map(|y| {
