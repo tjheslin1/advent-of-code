@@ -61,6 +61,36 @@ pub fn run_bingo(bingo_input: &str, cards: &mut Vec<BingoCard>) -> u32 {
     winner
 }
 
+pub fn determine_last_winning(bingo_input: &str, cards: &mut Vec<BingoCard>) -> u32 {
+    let bingo_numbers = bingo_input.split(',').map(|n| n.parse::<u32>().unwrap());
+
+    let cards_count = cards.len();
+    let mut cards_won: Vec<usize> = vec![];
+
+    for bingo_num in bingo_numbers {
+        for (index, card) in cards.iter_mut().enumerate() {
+            mark_card(card, bingo_num);
+
+            if cards_won.contains(&index) == false && check_card(card).is_empty() == false {
+                cards_won.push(index);
+
+                let sum_of_unmarked = card
+                    .grid
+                    .iter_mut()
+                    .filter(|(_, _, marked)| *marked == false)
+                    .map(|(_, num, _)| *num)
+                    .sum::<u32>();
+
+                if cards_won.len() == cards_count {
+                    return sum_of_unmarked * bingo_num;
+                }
+            }
+        }
+    }
+
+    0
+}
+
 pub fn parse_bingo_input(input: &str) -> (&str, Vec<BingoCard>) {
     let lines: Vec<&str> = input.split('\n').collect();
 
@@ -180,6 +210,41 @@ mod tests {
         let actual_result = run_bingo(bingo_numbers, &mut cards);
 
         assert_eq!(actual_result, 4512);
+    }
+
+    #[test]
+    fn determine_last_winning_example() {
+        let bingo_numbers =
+            "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1";
+
+        #[rustfmt::skip]
+            let mut cards = vec![
+            BingoCard { grid: vec![
+                ([0,0], 22, false),([1,0], 13, false),([2,0], 17, false),([3,0], 11, false),([4,0], 0, false),
+                ([0,1], 8, false),([1,1], 2, false),([2,1], 23, false),([3,1], 4, false),([4,1], 24, false),
+                ([0,2], 21, false),([1,2], 9, false),([2,2], 14, false),([3,2], 16, false),([4,2], 7, false),
+                ([0,3], 6, false),([1,3], 10, false),([2,3], 3, false),([3,3], 18, false),([4,3], 5, false),
+                ([0,4], 1, false),([1,4], 12, false),([2,4], 20, false),([3,4], 15, false),([4,4], 19, false),
+            ]},
+            BingoCard { grid: vec![
+                ([0,0], 3, false),([1,0], 15, false),([2,0], 0, false),([3,0], 2, false),([4,0], 22, false),
+                ([0,1], 9, false),([1,1], 18, false),([2,1], 13, false),([3,1], 17, false),([4,1], 5, false),
+                ([0,2], 19, false),([1,2], 8, false),([2,2], 7, false),([3,2], 25, false),([4,2], 23, false),
+                ([0,3], 20, false),([1,3], 11, false),([2,3], 10, false),([3,3], 24, false),([4,3], 4, false),
+                ([0,4], 14, false),([1,4], 21, false),([2,4], 16, false),([3,4], 12, false),([4,4], 6, false),
+            ]},
+            BingoCard { grid: vec![
+                ([0,0], 14, false),([1,0], 21, false),([2,0], 17, false),([3,0], 24, false),([4,0], 4, false),
+                ([0,1], 10, false),([1,1], 16, false),([2,1], 15, false),([3,1], 9, false),([4,1], 19, false),
+                ([0,2], 18, false),([1,2], 8, false),([2,2], 23, false),([3,2], 26, false),([4,2], 20, false),
+                ([0,3], 22, false),([1,3], 11, false),([2,3], 13, false),([3,3], 6, false),([4,3], 5, false),
+                ([0,4], 2, false),([1,4], 0, false),([2,4], 12, false),([3,4], 3, false),([4,4], 7, false),
+            ]},
+            ];
+
+        let actual_result = determine_last_winning(bingo_numbers, &mut cards);
+
+        assert_eq!(actual_result, 1924);
     }
 
     #[test]
