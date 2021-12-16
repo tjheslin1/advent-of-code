@@ -208,12 +208,29 @@ mod tests {
     ..........
     */
     #[test]
-    fn test_do_lines_overlap_first_horizontal_cross_vertical() {
+    fn test_do_lines_overlap_horizontal_cross_vertical() {
         let first = (0, 0, 2, 0);
         let second = (2, 0, 2, 2);
 
         let actual = lines_overlap(&first, &second);
         let expected = vec![(2, 0)];
+
+        assert_eq!(actual, expected);
+    }
+
+    /*
+    ..2.......
+    ..2.......
+    ..1.......
+    ..........
+    */
+    #[test]
+    fn test_do_lines_overlap_line_on_top_of_line() {
+        let first = (2, 0, 2, 2);
+        let second = (2, 0, 2, 1);
+
+        let actual = lines_overlap(&first, &second);
+        let expected = vec![(2, 0), ((2, 1))];
 
         assert_eq!(actual, expected);
     }
