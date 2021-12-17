@@ -1,18 +1,20 @@
 use std::cmp;
 
+use itertools::Itertools;
+
 type Point = (usize, usize);
 type Line = (usize, usize, usize, usize);
 
 pub fn find_overlapping_points(lines: &[Line], min_overlap: usize) -> usize {
-    let mut overlap_count = 0;
+    let mut overlaps: Vec<Point> = vec![];
 
     for first in 0..lines.len() {
         for second in first + 1..lines.len() {
-            overlap_count += lines_overlap(&lines[first], &lines[second]).len();
+            overlaps.append(&mut lines_overlap(&lines[first], &lines[second]));
         }
     }
 
-    overlap_count
+    overlaps.into_iter().unique().count()
 }
 
 pub fn parse_input(input: &str) -> Vec<Line> {
@@ -41,10 +43,12 @@ fn lines_overlap(first: &Line, second: &Line) -> Vec<Point> {
     let (first_x_1, first_y_1, first_x_2, first_y_2) = *first;
     let (second_x_1, second_y_1, second_x_2, second_y_2) = *second;
 
+    // if diagonal
     if first_x_1 != first_x_2 && first_y_1 != first_y_2 {
         return vec![];
     }
 
+    // if diagonal
     if second_x_1 != second_x_2 && second_y_1 != second_y_2 {
         return vec![];
     }
