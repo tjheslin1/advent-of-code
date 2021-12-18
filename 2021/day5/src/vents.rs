@@ -1,5 +1,3 @@
-use std::cmp;
-
 use itertools::Itertools;
 
 type Point = (usize, usize);
@@ -61,7 +59,7 @@ fn lines_overlap(first: &Line, second: &Line, handle_diagonal: bool) -> Vec<Poin
     first_points
         .iter()
         .filter(|p| second_points.contains(*p))
-        .map(|p| *p)
+        .copied()
         .collect::<Vec<Point>>()
 }
 
