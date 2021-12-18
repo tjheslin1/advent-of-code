@@ -5,12 +5,16 @@ use itertools::Itertools;
 type Point = (usize, usize);
 type Line = (usize, usize, usize, usize);
 
-pub fn find_overlapping_points(lines: &[Line], min_overlap: usize) -> usize {
+pub fn find_overlapping_points(lines: &[Line], min_overlap: usize, handle_diagonal: bool) -> usize {
     let mut overlaps: Vec<Point> = vec![];
 
     for first in 0..lines.len() {
         for second in first + 1..lines.len() {
-            overlaps.append(&mut lines_overlap(&lines[first], &lines[second]));
+            overlaps.append(&mut lines_overlap(
+                &lines[first],
+                &lines[second],
+                handle_diagonal,
+            ));
         }
     }
 
@@ -39,17 +43,15 @@ pub fn parse_input(input: &str) -> Vec<Line> {
         .collect::<Vec<Line>>()
 }
 
-fn lines_overlap(first: &Line, second: &Line) -> Vec<Point> {
+fn lines_overlap(first: &Line, second: &Line, handle_diagonal: bool) -> Vec<Point> {
     let (first_x_1, first_y_1, first_x_2, first_y_2) = *first;
     let (second_x_1, second_y_1, second_x_2, second_y_2) = *second;
 
-    // if diagonal
-    if first_x_1 != first_x_2 && first_y_1 != first_y_2 {
+    if handle_diagonal == false && first_x_1 != first_x_2 && first_y_1 != first_y_2 {
         return vec![];
     }
 
-    // if diagonal
-    if second_x_1 != second_x_2 && second_y_1 != second_y_2 {
+    if handle_diagonal == false && second_x_1 != second_x_2 && second_y_1 != second_y_2 {
         return vec![];
     }
 
@@ -64,28 +66,26 @@ fn lines_overlap(first: &Line, second: &Line) -> Vec<Point> {
 }
 
 fn find_points(x_1: usize, y_1: usize, x_2: usize, y_2: usize) -> Vec<Point> {
-    let mut points: Vec<Point> = vec![];
+    let x_length = i32::abs((x_1 as i32) - (x_2 as i32)) as usize;
+    let y_length = i32::abs((y_1 as i32) - (y_2 as i32)) as usize;
 
-    let min_x = cmp::min(x_1, x_2);
-    let max_x = cmp::max(x_1, x_2);
+    let x_range = match x_length {
+        0 => vec![x_1; y_length + 1],
+        _ if x_1 <= x_2 => (x_1..=x_2).collect::<Vec<usize>>(),
+        _ => (x_2..=x_1).rev().collect::<Vec<usize>>(),
+    };
 
-    let min_y = cmp::min(y_1, y_2);
-    let max_y = cmp::max(y_1, y_2);
+    let y_range = match y_length {
+        0 => vec![y_1; x_length + 1],
+        _ if y_1 <= y_2 => (y_1..=y_2).collect::<Vec<usize>>(),
+        _ => (y_2..=y_1).rev().collect::<Vec<usize>>(),
+    };
 
-    let mut x = min_x;
-    let mut y = min_y;
-    while x <= max_x {
-        while y <= max_y {
-            points.push((x, y));
-
-            y += 1;
-        }
-
-        x += 1;
-        y = min_y;
-    }
-
-    points
+    x_range
+        .iter()
+        .zip(y_range.iter())
+        .map(|(x, y)| (*x, *y))
+        .collect::<Vec<Point>>()
 }
 
 #[cfg(test)]
@@ -138,9 +138,29 @@ mod tests {
             (5, 5, 8, 2),
         ];
 
-        let actual_num_overlapping_points = find_overlapping_points(&input_points[..], 2);
+        let actual_num_overlapping_points = find_overlapping_points(&input_points[..], 2, false);
 
         assert_eq!(actual_num_overlapping_points, 5);
+    }
+
+    #[test]
+    fn test_find_overlapping_points_diagonal_example() {
+        let input_points = vec![
+            (0, 9, 5, 9),
+            (8, 0, 0, 8),
+            (9, 4, 3, 4),
+            (2, 2, 2, 1),
+            (7, 0, 7, 4),
+            (6, 4, 2, 0),
+            (0, 9, 2, 9),
+            (3, 4, 1, 4),
+            (0, 0, 8, 8),
+            (5, 5, 8, 2),
+        ];
+
+        let actual_num_overlapping_points = find_overlapping_points(&input_points[..], 2, true);
+
+        assert_eq!(actual_num_overlapping_points, 12);
     }
 
     /*
@@ -172,6 +192,34 @@ mod tests {
     }
 
     /*
+    1.........
+    .1........
+    ..1.......
+    ..........
+    */
+    #[test]
+    fn test_find_points_diagonal() {
+        let actual = find_points(0, 0, 2, 2);
+        let expected = vec![(0, 0), (1, 1), (2, 2)];
+
+        assert_eq!(actual, expected);
+    }
+
+    /*
+    ..1.......
+    .1........
+    1.........
+    ..........
+    */
+    #[test]
+    fn test_find_points_diagonal_back() {
+        let actual = find_points(2, 0, 0, 2);
+        let expected = vec![(2, 0), (1, 1), (0, 2)];
+
+        assert_eq!(actual, expected);
+    }
+
+    /*
     1.1.......
     1.1.......
     1.1.......
@@ -182,7 +230,7 @@ mod tests {
         let first = (0, 0, 0, 2);
         let second = (2, 0, 2, 2);
 
-        let actual = lines_overlap(&first, &second);
+        let actual = lines_overlap(&first, &second, false);
         let expected = vec![];
 
         assert_eq!(actual, expected);
@@ -199,7 +247,7 @@ mod tests {
         let first = (0, 0, 0, 2);
         let second = (0, 1, 3, 1);
 
-        let actual = lines_overlap(&first, &second);
+        let actual = lines_overlap(&first, &second, false);
         let expected = vec![(0, 1)];
 
         assert_eq!(actual, expected);
@@ -216,7 +264,7 @@ mod tests {
         let first = (0, 0, 2, 0);
         let second = (2, 0, 2, 2);
 
-        let actual = lines_overlap(&first, &second);
+        let actual = lines_overlap(&first, &second, false);
         let expected = vec![(2, 0)];
 
         assert_eq!(actual, expected);
@@ -233,8 +281,25 @@ mod tests {
         let first = (2, 0, 2, 2);
         let second = (2, 0, 2, 1);
 
-        let actual = lines_overlap(&first, &second);
+        let actual = lines_overlap(&first, &second, false);
         let expected = vec![(2, 0), ((2, 1))];
+
+        assert_eq!(actual, expected);
+    }
+
+    /*
+    1.1.......
+    .2........
+    1.1.......
+    ..........
+    */
+    #[test]
+    fn test_do_lines_overlap_diagonals() {
+        let first = (2, 0, 0, 2);
+        let second = (0, 0, 2, 2);
+
+        let actual = lines_overlap(&first, &second, true);
+        let expected = vec![(1, 1)];
 
         assert_eq!(actual, expected);
     }
