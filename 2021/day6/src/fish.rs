@@ -45,4 +45,12 @@ mod tests {
         let actual_num_fish_after_80_days = simulate_spawn(example, 80);
         assert_eq!(actual_num_fish_after_80_days, 5934);
     }
+
+    #[test]
+    fn test_live_forever() {
+        let example = "3,4,3,1,2";
+
+        let actual_num_fish_after_256_days = simulate_spawn(example, 256);
+        assert_eq!(actual_num_fish_after_256_days, 26984457539);
+    }
 }
