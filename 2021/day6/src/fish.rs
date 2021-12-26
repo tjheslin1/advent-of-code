@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 const DAYS_TO_CREATE_FISH: u32 = 6;
 const NEW_FISH_EXTRA_DAYS: u32 = 2;
 
@@ -30,6 +32,41 @@ pub fn simulate_spawn(input: &str, days_to_simulate: usize) -> usize {
     fish_school.len()
 }
 
+fn parse_input(input: &str) -> HashMap<usize, u32> {
+    let fish_school = input
+        .replace(" ", "")
+        .split('\n')
+        .filter(|line| *line != "")
+        .collect::<Vec<&str>>()
+        .first()
+        .unwrap()
+        .split(',')
+        .map(|s| s.parse().unwrap())
+        .collect::<Vec<usize>>();
+
+    let mut spawned_fish: HashMap<usize, u32> = HashMap::from([
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+        (8, 0),
+    ]);
+
+    fish_school.iter().for_each(|fish| {
+        if let Some(curr_count) = spawned_fish.get(fish) {
+            spawned_fish.insert(*fish, curr_count + 1);
+        } else {
+            panic!("Unexpected value for fish age: {}", fish);
+        }
+    });
+
+    spawned_fish
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -52,5 +89,26 @@ mod tests {
 
         let actual_num_fish_after_256_days = simulate_spawn(example, 256);
         assert_eq!(actual_num_fish_after_256_days, 26984457539);
+    }
+
+    #[test]
+    fn test_parse_input() {
+        let example = "3,4,3,1,2";
+
+        let actual_parsed_input = parse_input(example);
+
+        let expected_parsed_input = HashMap::from([
+            (0, 0),
+            (1, 1),
+            (2, 1),
+            (3, 2),
+            (4, 1),
+            (5, 0),
+            (6, 0),
+            (7, 0),
+            (8, 0),
+        ]);
+
+        assert_eq!(actual_parsed_input, expected_parsed_input);
     }
 }
