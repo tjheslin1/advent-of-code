@@ -33,8 +33,8 @@ pub fn simulate_spawn(input: &str, days_to_simulate: usize) -> u64 {
                 (*spawned_fish).insert(DAYS_TO_CREATE_FISH, new_fish + *curr_count);
             }
 
-            if let Some(_) = (*spawned_fish).get(&NEW_FISH_AGE) {
-                (*spawned_fish).insert(NEW_FISH_AGE, new_fish /* + *curr_count*/);
+            if (*spawned_fish).get(&NEW_FISH_AGE).is_some() {
+                (*spawned_fish).insert(NEW_FISH_AGE, new_fish);
             }
         });
 
