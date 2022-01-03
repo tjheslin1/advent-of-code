@@ -1,38 +1,50 @@
+use itertools::Itertools;
 use std::collections::HashMap;
 
-const DAYS_TO_CREATE_FISH: u32 = 6;
-const NEW_FISH_EXTRA_DAYS: u32 = 2;
+const DAYS_TO_CREATE_FISH: usize = 6;
+const NEW_FISH_AGE: usize = 8;
 
-pub fn simulate_spawn(input: &str, days_to_simulate: usize) -> usize {
-    let mut fish_school = input
-        .replace(" ", "")
-        .split('\n')
-        .filter(|line| *line != "")
-        .collect::<Vec<&str>>()
-        .first()
-        .unwrap()
-        .split(',')
-        .map(|s| s.parse().unwrap())
-        .collect::<Vec<u32>>();
+pub fn simulate_spawn(input: &str, days_to_simulate: usize) -> u64 {
+    let spawned_fish: *mut HashMap<usize, u64> = &mut parse_input(input);
 
-    (0..days_to_simulate).for_each(|_| {
-        let mut spawned_fish: Vec<u32> = vec![];
-        fish_school.iter_mut().for_each(|fish| {
-            if *fish == 0 {
-                *fish = DAYS_TO_CREATE_FISH;
-                spawned_fish.push(DAYS_TO_CREATE_FISH + NEW_FISH_EXTRA_DAYS);
-            } else {
-                *fish -= 1;
+    unsafe {
+        (0..days_to_simulate).for_each(|_| {
+            let mut new_fish: u64 = 0;
+
+            (*spawned_fish)
+                .iter_mut()
+                .sorted_by_key(|x| x.0)
+                .for_each(|fish_age| match fish_age {
+                    (0, count) => {
+                        new_fish = *count;
+
+                        (*spawned_fish).insert(0, 0);
+                    }
+                    (age, count) => {
+                        if let Some(curr_count) = (*spawned_fish).get(&(*age - 1)) {
+                            (*spawned_fish).insert(age - 1, *count + *curr_count);
+                        }
+
+                        (*spawned_fish).insert(*age, 0);
+                    }
+                });
+
+            if let Some(curr_count) = (*spawned_fish).get(&DAYS_TO_CREATE_FISH) {
+                (*spawned_fish).insert(DAYS_TO_CREATE_FISH, new_fish + *curr_count);
+            }
+
+            if let Some(_) = (*spawned_fish).get(&NEW_FISH_AGE) {
+                (*spawned_fish).insert(NEW_FISH_AGE, new_fish /* + *curr_count*/);
             }
         });
 
-        fish_school.append(&mut spawned_fish);
-    });
-
-    fish_school.len()
+        (*spawned_fish)
+            .iter()
+            .fold(0, |acc, (_, count)| acc + count)
+    }
 }
 
-fn parse_input(input: &str) -> HashMap<usize, u32> {
+fn parse_input(input: &str) -> HashMap<usize, u64> {
     let fish_school = input
         .replace(" ", "")
         .split('\n')
@@ -44,7 +56,7 @@ fn parse_input(input: &str) -> HashMap<usize, u32> {
         .map(|s| s.parse().unwrap())
         .collect::<Vec<usize>>();
 
-    let mut spawned_fish: HashMap<usize, u32> = HashMap::from([
+    let mut spawned_fish: HashMap<usize, u64> = HashMap::from([
         (0, 0),
         (1, 0),
         (2, 0),
