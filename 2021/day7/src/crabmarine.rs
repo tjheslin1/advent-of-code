@@ -11,9 +11,9 @@ pub fn calculate_cheapest_horizontal_position(
     fuel_cost_calculator: &dyn Fn(usize, usize) -> usize,
 ) -> (usize, usize) {
     let crabmarine_positions = input
-        .replace(" ", "")
+        .replace(' ', "")
         .split('\n')
-        .filter(|line| *line != "")
+        .filter(|line| line.is_empty() == false)
         .collect::<Vec<&str>>()
         .first()
         .unwrap()
@@ -42,7 +42,7 @@ pub fn calculate_cheapest_horizontal_position(
 
 fn calculate_fuel_cost_for_move(
     desired_position: usize,
-    crabmarine_positions: &Vec<usize>,
+    crabmarine_positions: &[usize],
     fuel_cost_calculator: &dyn Fn(usize, usize) -> usize,
 ) -> usize {
     crabmarine_positions.iter().fold(0, |acc, crab_pos| {
