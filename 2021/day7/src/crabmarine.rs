@@ -1,21 +1,9 @@
 pub const CONSTANT_FUEL_RATE: &dyn Fn(usize, usize) -> usize = &|a: usize, b: usize| a.abs_diff(b);
 
-pub const INCREASING_FULE_RATE: &dyn Fn(usize, usize) -> usize = &|a: usize, b: usize| {
+pub const INCREASING_FUEL_RATE: &dyn Fn(usize, usize) -> usize = &|a: usize, b: usize| {
     let distance = a.abs_diff(b);
 
-    /*
-        1 -> 1
-        2 -> 3
-        3 -> 6
-        4 -> 10
-    */
-
-    (1..distance).fold(1, |acc, step| {
-        // println!("step = {}", step);
-        // println!("acc = {}", acc);
-
-        acc + 1 + step
-    })
+    (0..distance).fold(0, |acc, step| acc + 1 + step)
 };
 
 pub fn calculate_cheapest_horizontal_position(
@@ -33,23 +21,23 @@ pub fn calculate_cheapest_horizontal_position(
         .map(|s| s.parse().unwrap())
         .collect::<Vec<usize>>();
 
-    crabmarine_positions
+    let max_position = crabmarine_positions
         .iter()
-        .fold((0, usize::max_value()), |(acc_pos, acc_cost), crab_pos| {
-            // println!("Calculating fuel cost for {}", crab_pos);
+        .fold(
+            crabmarine_positions[0],
+            |acc, pos| if *pos > acc { *pos } else { acc },
+        );
 
-            let fuel_cost = calculate_fuel_cost_for_move(
-                *crab_pos,
-                &crabmarine_positions,
-                fuel_cost_calculator,
-            );
+    (0..max_position).fold((0, usize::max_value()), |(acc_pos, acc_cost), position| {
+        let fuel_cost =
+            calculate_fuel_cost_for_move(position, &crabmarine_positions, fuel_cost_calculator);
 
-            if fuel_cost < acc_cost {
-                (*crab_pos, fuel_cost)
-            } else {
-                (acc_pos, acc_cost)
-            }
-        })
+        if fuel_cost < acc_cost {
+            (position, fuel_cost)
+        } else {
+            (acc_pos, acc_cost)
+        }
+    })
 }
 
 fn calculate_fuel_cost_for_move(
@@ -83,10 +71,28 @@ mod tests {
         let input = "16,1,2,0,4,2,7,1,2,14";
 
         let (actual_pos, actual_cost) =
-            calculate_cheapest_horizontal_position(input, INCREASING_FULE_RATE);
+            calculate_cheapest_horizontal_position(input, INCREASING_FUEL_RATE);
 
         assert_eq!(actual_pos, 5);
         assert_eq!(actual_cost, 168);
+    }
+
+    #[test]
+    fn test_calculate_zero_fuel_cost() {
+        let input = vec![1];
+
+        let actual = calculate_fuel_cost_for_move(1, &input, CONSTANT_FUEL_RATE);
+
+        assert_eq!(actual, 0);
+    }
+
+    #[test]
+    fn test_calculate_zero_fuel_cost_increasing_fuel_cost() {
+        let input = vec![1];
+
+        let actual = calculate_fuel_cost_for_move(1, &input, INCREASING_FUEL_RATE);
+
+        assert_eq!(actual, 0);
     }
 
     #[test]
@@ -105,5 +111,28 @@ mod tests {
         let actual = calculate_fuel_cost_for_move(6, &input, CONSTANT_FUEL_RATE);
 
         assert_eq!(actual, 10);
+    }
+
+    #[test]
+    fn test_calculate_fuel_cost_first_position_increasing_fuel_cost() {
+        let input = vec![1, 5, 6, 10];
+
+        let actual = calculate_fuel_cost_for_move(1, &input, INCREASING_FUEL_RATE);
+
+        let seventy =
+            0 + (1 + 2 + 3 + 4) + (1 + 2 + 3 + 4 + 5) + (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9);
+
+        assert_eq!(actual, seventy);
+    }
+
+    #[test]
+    fn test_calculate_fuel_cost_position_increasing_fuel_cost() {
+        let input = vec![1, 5, 6, 10];
+
+        let actual = calculate_fuel_cost_for_move(4, &input, INCREASING_FUEL_RATE);
+
+        let thirty_one = (1 + 2 + 3) + (1) + (1 + 2) + (1 + 2 + 3 + 4 + 5 + 6);
+
+        assert_eq!(actual, thirty_one);
     }
 }
