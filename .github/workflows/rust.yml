@@ -21,9 +21,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install latest nightly
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        override: true
+        components: rustfmt, clippy
     - name: Build
-      working-directory: 2021/day${{ matrix.day }}
-      run: cargo +nightly build --verbose
+        uses: actions-rs/cargo@v1
+        working-directory: 2021/day${{ matrix.day }}
+        with:
+          command: build --verbose
     - name: Run tests
-      working-directory: 2021/day${{ matrix.day }}
-      run: cargo +nightly test --verbose
+        uses: actions-rs/cargo@v1
+        working-directory: 2021/day${{ matrix.day }}
+        with:
+          command: test --verbose
