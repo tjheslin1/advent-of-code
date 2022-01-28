@@ -32,8 +32,9 @@ jobs:
         working-directory: 2021/day${{ matrix.day }}
         with:
           command: build --verbose
+          args: --manifest-path 2021/day${{ matrix.day }}/Cargo.toml
     - name: Run tests
         uses: actions-rs/cargo@v1
-        working-directory: 2021/day${{ matrix.day }}
         with:
           command: test --verbose
+	  args: --manifest-path 2021/day${{ matrix.day }}/Cargo.toml
