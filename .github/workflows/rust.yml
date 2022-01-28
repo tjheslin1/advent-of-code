@@ -28,12 +28,8 @@ jobs:
         override: true
         components: rustfmt, clippy
     - name: Build
-      uses: actions-rs/cargo@v1
-      with:
-        command: build --verbose
-        args: --manifest-path 2021/day${{ matrix.day }}/Cargo.toml
+      working-directory: 2021/day${{ matrix.day }}
+      run: cargo build --verbose
     - name: Run tests
-      uses: actions-rs/cargo@v1
-      with:
-        command: test --verbose
-	args: --manifest-path 2021/day${{ matrix.day }}/Cargo.toml
+      working-directory: 2021/day${{ matrix.day }}
+      run: cargo test --verbose
